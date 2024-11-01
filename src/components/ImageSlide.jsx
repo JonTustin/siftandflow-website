@@ -2,52 +2,49 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { products } from "../constants/products";
+import useImagePreloader from "../hooks/useImagePreloader";
 
 const ImageSlide = () => {
-  const imageRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const imageRef = useRef(null); // Reference to the current image element for animation
+  const [currentIndex, setCurrentIndex] = useState(0); // Track the current image index
+
+  // Calculate next image index and preload images
+  const nextIndex = (currentIndex + 1) % products.length; // Get index of next image
+  const imagesToPreload = [products[currentIndex].image, products[nextIndex].image]; // Images to preload
+  useImagePreloader(imagesToPreload); // Preload images to prevent lag
 
   useEffect(() => {
+    // Restore default GSAP ticker settings for optimal performance
+    gsap.ticker.fps(-1);
+
+    // Create a GSAP timeline with refined duration and easing
     const tl = gsap.timeline({
-      repeat: -1, // Infinite loop
-      onRepeat: () => {
-        // Update to the next image when the timeline repeats
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % products.length);
-      },
+      repeat: -1, // Infinite loop for continuous scrolling
+      onRepeat: () => setCurrentIndex((prevIndex) => (prevIndex + 1) % products.length), // Update image index on repeat
     });
 
+    // Animation sequence for smoother transition
     tl.fromTo(
       imageRef.current,
-      { x: "100vw", opacity: 1 }, // Start offscreen to the right
-      { x: "0vw", opacity: 1, duration: 1.5, ease: "power2.out" }, // Slide in
+      { x: "100vw", opacity: 1 }, // Start offscreen to the right with full opacity
+      { x: "0vw", opacity: 1, duration: 1.8, ease: "power1.out" } // Slide in with moderate easing and slightly extended duration
     )
-      .to(imageRef.current, { delay: 3 }) // Pause in center
-      .to(imageRef.current, {
-        x: "-100vw",
-        opacity: 0,
-        duration: 1.5,
-        ease: "power2.in",
-      }) // Slide out
-      .set(imageRef.current, { x: "100vw" }); // Reset position offscreen
+      .to(imageRef.current, { delay: 2.5 }) // Shorter pause duration to improve flow
+      .to(imageRef.current, { x: "-100vw", opacity: 0, duration: 1.8, ease: "power1.in" }) // Slide out with refined easing and duration
+      .set(imageRef.current, { x: "100vw" }); // Reset position for the next loop
 
-    return () => tl.kill(); // Clean up on unmount
-  }, []);
+    // Cleanup function to kill the timeline on component unmount
+    return () => tl.kill(); // Destroy the timeline on cleanup
+  }, [currentIndex]); // Re-run the effect when the currentIndex changes
 
   return (
     <div className="absolute inset-0 w-screen h-screen flex justify-center items-center overflow-hidden">
       <img
-        ref={imageRef}
-        src={products[currentIndex].image}
+        ref={imageRef} // Attach ref to image element for GSAP animation
+        src={products[currentIndex].image} // Set the current image based on the index
         alt="Product"
-        loading="lazy"
-        className="w-[350px] h-[350px] object-cover"
-      />
-
-      {/* Preload the next image to ensure smooth transitions */}
-      <img
-        src={products[(currentIndex + 1) % products.length].image}
-        alt=""
-        className="hidden"
+        loading="lazy" // Lazy load the image for better loading performance
+        className="w-[350px] h-[350px] object-cover" // Control image styling for size and layout
       />
     </div>
   );

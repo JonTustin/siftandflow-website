@@ -1,19 +1,16 @@
 // src/components/CarouselButton.jsx
 import React from 'react';
+import BaseButton from './BaseButton';
 
 const CarouselButton = ({ direction, onClick }) => {
   return (
-    <button
+    <BaseButton
       onClick={onClick}
-      className="p-2 bg-gray-800 text-white rounded-full shadow-md hover:bg-gray-700 transition duration-300"
-      aria-label={`Scroll ${direction}`}
+      ariaLabel={`Scroll ${direction}`}
+      className="bg-gray-800 text-white hover:bg-gray-700"
     >
-      {direction === 'left' ? (
-        <span>&larr;</span> // Left arrow
-      ) : (
-        <span>&rarr;</span> // Right arrow
-      )}
-    </button>
+      {direction === 'left' ? <span>&larr;</span> : <span>&rarr;</span>}
+    </BaseButton>
   );
 };
 

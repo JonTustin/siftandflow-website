@@ -5,11 +5,18 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
 import MenuPage from './components/MenuPage';
+import EventsPage from './components/EventsPage';
+import LeftCornerLogo from './components/LeftCornerLogo';
+import RightCornerImage from './components/RightCornerImage'; // Update to RightCornerImage
 
 function App() {
   return (
     <Router>
       <div className="flex flex-col h-screen">
+        {/* Independent Logo and Right-Side Image */}
+        <LeftCornerLogo />
+        <RightCornerImage /> {/* Updated component name */}
+
         {/* Navbar (Header) */}
         <header className="flex-none">
           <Navbar />
@@ -20,6 +27,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Hero />} />
             <Route path="/menu" element={<MenuPage />} />
+            <Route path="/events" element={<EventsPage />} />
           </Routes>
         </main>
 

@@ -1,8 +1,11 @@
 /* src/index.css */
+
+/* Import Tailwind base, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Global styles for body */
 body {
   @apply bg-background text-foreground font-playfair;
   margin: 0;
@@ -10,4 +13,29 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Custom reusable styles */
+.btn {
+  @apply p-2 rounded-full shadow-md transition duration-300 focus:outline-none;
+}
+
+.btn-primary {
+  @apply bg-gray-800 text-white hover:bg-gray-700;
+}
+
+.btn-secondary {
+  @apply text-blue-500 hover:underline ml-2;
+}
+
+.heading-primary {
+  @apply text-5xl font-chomsky text-foreground mb-8 text-center;
+}
+
+.heading-secondary {
+  @apply text-3xl font-playfair text-foreground underline mb-4 text-center;
+}
+
+.text-light {
+  @apply text-lightGray;
 }

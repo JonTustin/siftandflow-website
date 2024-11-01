@@ -13,8 +13,7 @@ const MenuPage = () => {
 
   return (
     <div className="bg-background min-h-screen p-8">
-      {/* Main Menu Title */}
-      <h1 className="text-5xl font-chomsky text-foreground mb-8 text-center">Our Menu</h1>
+      <h1 className="text-5xl font-chomsky text-foreground mb-8 text-center">The Menu</h1>
 
       {/* Cookies Carousel */}
       <Carousel title="Cookies" items={cookies} onCardClick={setSelectedProduct} />
