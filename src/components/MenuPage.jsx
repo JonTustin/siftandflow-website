@@ -13,12 +13,12 @@ const MenuPage = () => {
 
   return (
     <div className="bg-background min-h-screen p-8">
-      <h1 className="text-5xl font-chomsky text-foreground mb-8 text-center">The Menu</h1>
+      <h1 className="text-5xl font-chomsky text-foreground mb-2 text-center">The Menu</h1>
 
-      {/* Cookies Carousel */}
+      {/* Cookies Carousel with Indicators and Arrows */}
       <Carousel title="Cookies" items={cookies} onCardClick={setSelectedProduct} />
 
-      {/* Biscotti Carousel */}
+      {/* Biscotti Carousel with Indicators and Arrows */}
       <Carousel title="Biscotti" items={biscotti} onCardClick={setSelectedProduct} />
 
       {/* Modal for additional product details */}

@@ -1,8 +1,9 @@
 // src/components/Carousel.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 import ProductCard from './ProductCard';
+import { gsap } from 'gsap';
 
 const Carousel = ({ title, items, onCardClick }) => {
   const [currentStartIndex, setCurrentStartIndex] = useState(0); // Track current start index
@@ -11,7 +12,7 @@ const Carousel = ({ title, items, onCardClick }) => {
 
   useEffect(() => {
     const carousel = carouselRef.current;
-    const cardWidth = carousel.firstChild.offsetWidth;
+    const cardWidth = 200; // Fixed card width for alignment
     const visibleWidth = carousel.offsetWidth;
 
     // Center the first card in the carousel on initial load
@@ -27,7 +28,7 @@ const Carousel = ({ title, items, onCardClick }) => {
   // Scroll function for infinite scrolling
   const scroll = (direction) => {
     const carousel = carouselRef.current;
-    const cardWidth = carousel.firstChild.offsetWidth;
+    const cardWidth = 200; // Consistent width of each card
     const totalItems = items.length;
 
     // Update index with wraparound
@@ -48,24 +49,8 @@ const Carousel = ({ title, items, onCardClick }) => {
   };
 
   return (
-    <div className="relative mb-8 flex flex-col items-center">
-      <h2 className="text-3xl font-playfair text-foreground underline mb-4 text-center">{title}</h2>
-
-      {/* Navigation buttons */}
-      <button
-        onClick={() => scroll('left')}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full border-2 border-foreground bg-background text-foreground shadow-md hover:bg-foreground hover:text-background transition duration-300"
-        aria-label="Scroll left"
-      >
-        <HiChevronLeft className="w-6 h-6" />
-      </button>
-      <button
-        onClick={() => scroll('right')}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full border-2 border-foreground bg-background text-foreground shadow-md hover:bg-foreground hover:text-background transition duration-300"
-        aria-label="Scroll right"
-      >
-        <HiChevronRight className="w-6 h-6" />
-      </button>
+    <div className="relative mb-[5px] flex flex-col items-center">
+      <h2 className="text-2xl font-playfair text-foreground underline mb-[5px] text-center">{title}</h2>
 
       {/* Carousel Container */}
       <div className="w-full overflow-hidden flex justify-center">
@@ -75,10 +60,47 @@ const Carousel = ({ title, items, onCardClick }) => {
               key={`${product.id}-${index}`}
               product={product}
               onClick={() => onCardClick(product)}
-              className="flex-shrink-0 w-[200px] h-[250px]"
+              className="flex-shrink-0 w-[200px] h-[250px]" // Static dimensions
             />
           ))}
         </div>
+      </div>
+
+      {/* Dot Indicators with Arrow Buttons */}
+      <div className="flex items-center space-x-4 mt-2">
+        {/* Left Arrow */}
+        <button
+          onClick={() => scroll('left')}
+          className="text-foreground focus:outline-none transition duration-300"
+          aria-label="Scroll left"
+          style={{ backgroundColor: 'transparent' }}
+        >
+          <FontAwesomeIcon icon={faCaretLeft} className="w-5 h-5" />
+        </button>
+
+        {/* Dot Indicators */}
+        <div className="flex space-x-2">
+          {items.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentStartIndex(index)}
+              className={`h-3 w-3 rounded-full ${
+                index === currentStartIndex ? 'bg-foreground' : 'bg-lightGray'
+              } transition duration-300`}
+              aria-label={`Go to product ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Right Arrow */}
+        <button
+          onClick={() => scroll('right')}
+          className="text-foreground focus:outline-none transition duration-300"
+          aria-label="Scroll right"
+          style={{ backgroundColor: 'transparent' }}
+        >
+          <FontAwesomeIcon icon={faCaretRight} className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );

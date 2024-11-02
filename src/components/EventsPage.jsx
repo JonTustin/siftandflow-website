@@ -1,18 +1,70 @@
 // src/components/EventsPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { events } from '../constants/events';
-import MapButton from './MapButton';
-import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
+import EventCard from './EventCard';
+import NavigationButton from './NavigationButton';
+import DotIndicator from './DotIndicator';
+import { gsap } from 'gsap';
+
+const CARD_WIDTH = 300; // Width of each card in pixels
+const CARD_MARGIN = 12.5; // Margin on each side to achieve 25px spacing
+
+const debounce = (func, delay) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+};
 
 const EventsPage = () => {
-  const [currentIndex, setCurrentIndex] = useState(0); // Track current event index
+  const [currentIndex, setCurrentIndex] = useState(0); // Index of currently centered card
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024); // Check if screen is large
+  const containerRef = useRef(null); // Ref for the container of all cards
 
-  // Scroll navigation handler
+  // Function to calculate and center the card(s) at currentIndex with GSAP animation
+  const centerCards = (index = currentIndex) => {
+    if (containerRef.current) {
+      const containerCenter = window.innerWidth / 2; // Center of the viewport
+      const offset = containerCenter - (CARD_WIDTH + CARD_MARGIN * 2) / 2;
+      const position = -index * (CARD_WIDTH + CARD_MARGIN * 2) + offset;
+
+      // Apply GSAP animation to the position change
+      gsap.to(containerRef.current, {
+        x: position,
+        duration: 0.5, // Adjust duration for smoothness
+        ease: 'sine.out', // Use easing for a smooth transition
+      });
+    }
+  };
+
+  // Center cards on load and whenever currentIndex changes
+  useEffect(() => {
+    centerCards(0); // Center on the first card at load
+  }, []);
+
+  useEffect(() => {
+    centerCards(); // Center on the current index whenever it changes
+  }, [currentIndex, isLargeScreen]);
+
+  // Handle window resize for responsive adjustments
+  useEffect(() => {
+    const handleResize = debounce(() => {
+      setIsLargeScreen(window.innerWidth >= 1024); // Update screen size state
+      centerCards(); // Re-center cards on resize
+    }, 100);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [currentIndex]);
+
+  // Handle left and right scroll without limiting based on visible cards
   const handleScroll = (direction) => {
+    const maxIndex = events.length - 1; // Ensure full array is accessible
     if (direction === 'left' && currentIndex > 0) {
-      setCurrentIndex((prevIndex) => prevIndex - 1); // Move to previous event
-    } else if (direction === 'right' && currentIndex < events.length - 1) {
-      setCurrentIndex((prevIndex) => prevIndex + 1); // Move to next event
+      setCurrentIndex((prevIndex) => prevIndex - 1);
+    } else if (direction === 'right' && currentIndex < maxIndex) {
+      setCurrentIndex((prevIndex) => prevIndex + 1);
     }
   };
 
@@ -20,55 +72,40 @@ const EventsPage = () => {
     <section className="bg-background text-foreground min-h-screen p-8 flex flex-col items-center">
       <h1 className="text-4xl font-chomsky text-center underline mb-8">Tour Dates</h1>
 
-      {/* Navigation Buttons */}
-      <div className="relative w-full flex items-center justify-center mb-6">
-        {currentIndex > 0 && (
-          <button
-            onClick={() => handleScroll('left')}
-            className="absolute left-0 p-2 rounded-full border-2 border-foreground bg-background text-foreground shadow-md hover:bg-foreground hover:text-background transition duration-300"
-            aria-label="Scroll left"
-          >
-            <HiChevronLeft className="w-6 h-6" />
-          </button>
-        )}
-
-        {currentIndex < events.length - 1 && (
-          <button
-            onClick={() => handleScroll('right')}
-            className="absolute right-0 p-2 rounded-full border-2 border-foreground bg-background text-foreground shadow-md hover:bg-foreground hover:text-background transition duration-300"
-            aria-label="Scroll right"
-          >
-            <HiChevronRight className="w-6 h-6" />
-          </button>
-        )}
+      {/* Full-Width Carousel Display */}
+      <div className="relative flex items-center overflow-hidden w-full">
+        {/* Card Container */}
+        <div ref={containerRef} className="flex space-x-[25px] w-full">
+          {events.map((event, index) => (
+            <EventCard key={index} event={event} />
+          ))}
+        </div>
       </div>
 
-      {/* Display the Current Event Card */}
-      <div className="bg-darkGray w-[300px] p-6 rounded-lg shadow-md text-center">
-        <h2 className="text-2xl font-playfair text-foreground mb-4">{events[currentIndex].title}</h2>
+      {/* Navigation Controls */}
+      <div className="flex items-center mt-6 space-x-4">
+        <NavigationButton
+          direction="left"
+          onClick={() => handleScroll('left')}
+          disabled={currentIndex === 0}
+        />
 
-        {/* Event Details */}
-        <div className="mb-2">
-          <p className="font-playfair text-sm text-lightGray">Date:</p>
-          <p className="text-lg text-foreground">{events[currentIndex].date}</p>
+        {/* Dot Indicators */}
+        <div className="flex space-x-2">
+          {events.map((_, index) => (
+            <DotIndicator
+              key={index}
+              active={index === currentIndex}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
         </div>
-        <div className="mb-2">
-          <p className="font-playfair text-sm text-lightGray">Time:</p>
-          <p className="text-foreground">{events[currentIndex].time}</p>
-        </div>
-        <div className="mb-2">
-          <p className="font-playfair text-sm text-lightGray">Location:</p>
-          <p className="text-foreground">{events[currentIndex].location}</p>
-          <MapButton location={events[currentIndex].location} />
-        </div>
-        <div className="mt-4">
-          <h3 className="font-playfair mb-2 text-lightGray">Product Assortment:</h3>
-          <ul className="list-none">
-            {events[currentIndex].productAssortment.map((product, idx) => (
-              <li key={idx} className="text-lightGray">{product}</li>
-            ))}
-          </ul>
-        </div>
+
+        <NavigationButton
+          direction="right"
+          onClick={() => handleScroll('right')}
+          disabled={currentIndex >= events.length - 1}
+        />
       </div>
     </section>
   );
